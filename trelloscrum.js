@@ -21,7 +21,9 @@ var _pointSeq = ['?', 0, 1, 2, 3, 5, 8, 13, 20];
 //internals
 var filtered = false, //watch for filtered cards
 	reg = /\((\x3f|\d*\.?\d+)\)\s?/m, //parse regexp- accepts digits, decimals and '?'
-	iconUrl = chrome.extension.getURL('images/storypoints-icon.png');
+	valueReg = /\(((V?[A-Z])|(V(\x3f|\d*\.?\d+)))\)\s?/im, // parse value regexp- a value of H, M or L or V followed by digits, decimals
+	iconUrl = chrome.extension.getURL('images/storypoints-icon.png'),
+	valueIconUrl = chrome.extension.getURL('images/value-icon.png');
 
 //what to do when DOM loads
 $(function(){
@@ -105,18 +107,24 @@ function ListCard(el){
 	el.listCard=this;
 
 	var points=-1,
+		value=-1,
 		parsed,
 		that=this,
 		busy=false,
 		busy2=false,
+		busy3=false,
 		to,
 		to2,
+		to3,
 		ptitle,
 		$card=$(el)
 			.bind('DOMNodeInserted',function(e){
 				if(!busy && ($(e.target).hasClass('list-card-title') || e.target==$card[0])) {
 					clearTimeout(to2);
-					to2=setTimeout(getPoints);
+					to2=setTimeout(function(){
+						getValue();
+						getPoints();
+					});
 				}
 			}),
 		$badge=$('<div class="badge badge-points point-count" style="background-image: url('+iconUrl+')"/>')
@@ -127,6 +135,16 @@ function ListCard(el){
 				to = setTimeout(function(){
 					$badge.prependTo($card.find('.badges'));
 					busy2=false;
+				});
+			}),
+		$valueBadge=$('<div class="badge badge-points point-count" style="background-image: url('+valueIconUrl+')"/>')
+			.bind('DOMSubtreeModified DOMNodeRemovedFromDocument',function(e){
+				if(busy3)return;
+				busy3=true;
+				clearTimeout(to3);
+				to3 = setTimeout(function(){
+					$valueBadge.prependTo($card.find('.badges'));
+					busy3=false;
 				});
 			});
 
@@ -145,12 +163,33 @@ function ListCard(el){
 		busy=false;
 	};
 
+	function getValue(){
+		var $title=$card.find('a.list-card-title');
+		if(!$title[0]||busy)return;
+		busy=true;
+		var title=$title[0].text;
+		parsed=title.match(valueReg);
+		value=parsed?parsed[1].replace(/V/gim,''):-1;
+		if($card.parent()[0]){
+			$title[0].textContent = title.replace(valueReg,'');
+			$valueBadge.text(that.value);
+			$valueBadge.attr({title: 'This card has a '+that.value+ ' value'})
+		}
+		busy=false;
+	}
+
 	this.__defineGetter__('points',function(){
 		//don't add to total when filtered out
 		return parsed&&(!filtered||($card.css('opacity')==1 && $card.css('display')!='none'))?points:''
 	});
 
-	getPoints()
+	this.__defineGetter__('value',function(){
+		//don't add to total when filtered out
+		return parsed&&(!filtered||($card.css('opacity')==1 && $card.css('display')!='none'))?value:''
+	});
+
+	getValue();
+	getPoints();
 };
 
 //forcibly calculate list totals
