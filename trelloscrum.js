@@ -20,8 +20,8 @@ var _pointSeq = ['?', 0, 1, 2, 3, 5, 8, 13, 20];
 
 //internals
 var filtered = false, //watch for filtered cards
-	reg = /\((\x3f|\d*\.?\d+)\)\s?/m, //parse regexp- accepts digits, decimals and '?'
-	valueReg = /\(((V?[A-Z])|(V(\x3f|\d*\.?\d+)))\)\s?/im, // parse value regexp- a value of H, M or L or V followed by digits, decimals
+	reg = /\(((\x3f|\d*\.?\d+)|(-\w+))\)\s?/m, //parse regexp- accepts digits, decimals and '?'
+	valueReg = /\((([HML])|(\+\w+)|(\+(\x3f|\d*\.?\d+)))\)\s?/im, // parse value regexp- a value of H, M or L or V followed by digits, decimals
 	iconUrl = chrome.extension.getURL('images/storypoints-icon.png'),
 	valueIconUrl = chrome.extension.getURL('images/value-icon.png');
 
@@ -154,7 +154,7 @@ function ListCard(el){
 		busy=true;
 		var title=$title[0].text;
 		parsed=title.match(reg);
-		points=parsed?parsed[1]:-1;
+		points=parsed?parsed[1].replace(/^-/m,''):-1;
 		if($card.parent()[0]){
 			$title[0].textContent = title.replace(reg,'');
 			$badge.text(that.points);
@@ -169,7 +169,7 @@ function ListCard(el){
 		busy=true;
 		var title=$title[0].text;
 		parsed=title.match(valueReg);
-		value=parsed?parsed[1].replace(/V/gim,''):-1;
+		value=parsed?parsed[1].replace(/^\+/m,''):-1;
 		if($card.parent()[0]){
 			$title[0].textContent = title.replace(valueReg,'');
 			$valueBadge.text(that.value);
