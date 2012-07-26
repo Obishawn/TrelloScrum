@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
 ** TrelloScrum v0.56 - https://github.com/Q42/TrelloScrum
 ** Adds Scrum to your Trello
