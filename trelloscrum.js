@@ -25,6 +25,7 @@ var pointSeq = ['?', 0, 1, 2, 3, 5, 8, 13, 20],
 	iconUrl = chrome.extension.getURL('images/storypoints-icon.png'),
 	valueIconUrl = chrome.extension.getURL('images/value-icon.png'),
 	blockIconUrl = chrome.extension.getURL('images/block-icon.png'),
+    unitIconUrl = chrome.extension.getURL('images/unit-icon.png'),
     $excel_btn,
     $excel_dl;
 
@@ -68,7 +69,7 @@ $(function () {
             $blockBadge;
 
         function getPoints() {
-            var $title, title;
+            var $title, title, valueAsFloat;
 
             $title = $card.find('a.list-card-title');
             if (!$title[0] || busy) {
@@ -78,10 +79,21 @@ $(function () {
             title = $title[0].text;
             parsed = title.match(reg);
             points = parsed ? parsed[1] : -1;
+            valueAsFloat = parseFloat(points);
             if ($card.parent()[0]) {
                 $title[0].textContent = title.replace(reg, '');
                 $badge.text(that.points);
                 $badge.attr({ title: 'This card has ' + that.points + ' storypoint' + (that.points === 1 ? '.' : 's.') });
+				
+				console.log(valueAsFloat);
+				
+                if (valueAsFloat === 0.1) {
+                    $card.css('background-image', 'url("' + unitIconUrl + '")');
+                    $card.css('background-repeat', 'no-repeat');
+                    $card.css('background-position', 'right 5px');
+                } else {
+                    $card.css('background', '');
+                }
             }
             busy = false;
         }
@@ -350,7 +362,7 @@ $(function () {
         }
 
         $picker = $('<div class="picker">').appendTo('.card-detail-title .edit-controls');
-        
+
         function nodeOnClick(element) {
             var value = $(element).text(),
                     $text = $('.card-detail-title .edit textarea'),
