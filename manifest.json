@@ -1,4 +1,5 @@
 {
+	"manifest_version": 2,
 	"name": "Trello Scrum",
 	"version": "1.0",
 	"description": "Adds Scrum to your Trello",
@@ -9,5 +10,11 @@
 			"css": ["trelloscrum.css"]
 		}
 	],
-    "icons": { "128": "trello-scrum-icon.png" }
+    "icons": { "128": "trello-scrum-icon.png" },
+	"web_accessible_resources": [
+		"images/block-icon.png",
+		"images/storypoints-icon.png",
+		"images/unit-icon.png",
+		"images/value-icon.png"
+	  ]
 }
